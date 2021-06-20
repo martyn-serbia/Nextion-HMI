@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Nextion HMI",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"ostream": "cpp"
+		}
+	}
+}
