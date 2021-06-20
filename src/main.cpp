@@ -18,6 +18,7 @@ void Temp_read(void);
 //int Cat_band(void);
 
 const uint8_t term[3] = {0xff, 0xff, 0xff};
+
 const unsigned int PwrSwrRefreshInterval = 100;      //Power and SWR fastest
 const unsigned int VoltCurrentRefreshInterval = 250; // Voltage Current and CAT input next fastest
 const unsigned int TempRefreshInterval = 1000;       // Temp is slow >500ms for temp read
@@ -25,9 +26,9 @@ unsigned long previousPwrSwrMillis = 0;
 unsigned long previousVoltageCurrentMillis = 0;
 unsigned long previousTempMillis = 0;
 
-unsigned int power = 35;
+unsigned int power = 45;
 unsigned int swr = 18;
-unsigned int current = 103;
+unsigned int current = 120;
 unsigned int voltage = 127;
 unsigned int temp = 327;
 
@@ -240,7 +241,6 @@ void HMI_read()
 {
   uint8_t rxData[30];
   uint8_t data;
-  uint8_t flag_rx;
   uint8_t counter;
   uint8_t button;
 
@@ -250,14 +250,13 @@ void HMI_read()
     rxData[counter] = data;
     if ((counter > 3) && (rxData[counter] == 0xff) && (rxData[counter - 1] == 0xff) && (rxData[counter - 2] == 0xff))
     {
-      flag_rx = 1;
       // Touch event -6(0x65); -5(pg 0x00), -4(id), -3(0x00 release)
       if ((rxData[counter - 6] == 0x65) && (rxData[counter - 5] == 0x00) && (rxData[counter - 3] == 0x00))
       {
         button = rxData[counter - 4];
         // Serial.print("Button pressed is ");
         // Serial.println(button);
-        band_set = band.process_button(button);
+        band_set = band.process_button(button, auto_on);
         if (band_set < 16)
         {
           band.SetBandBCD(band_set);
@@ -268,12 +267,10 @@ void HMI_read()
         }
       }
       counter = 0;
-      flag_rx = 0;
     }
     counter++;
     if (counter >= 30)
     { //if too much data in...
-      flag_rx = 0;
       counter = 0;
     }
   }

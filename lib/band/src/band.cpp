@@ -105,13 +105,14 @@ int Band::Cat_band(void)
   }
 }
 
-int Band::process_button(uint8_t press)
+int Band::process_button(uint8_t press, uint8_t autof)
 {
+  const uint8_t term[3] = {0xff, 0xff, 0xff};
   switch (press)
   {
   case 2: //Toggle Auto
-    auto_on = !auto_on;
-    if (auto_on)
+    autof = !autof;
+    if (autof)
     {
       Serial1.print(F("bt7.val=1"));
       Serial1.write(term, 3);
@@ -123,7 +124,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 3: //160
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b0,1"));
       Serial1.write(term, 3);
@@ -131,7 +132,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 4: //80
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b1,1"));
       Serial1.write(term, 3);
@@ -139,7 +140,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 5: //40
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b2,1"));
       Serial1.write(term, 3);
@@ -147,7 +148,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 6: //20
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b3,1"));
       Serial1.write(term, 3);
@@ -155,7 +156,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 7: //15
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b4,1"));
       Serial1.write(term, 3);
@@ -163,7 +164,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 8: //10
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b5,1"));
       Serial1.write(term, 3);
@@ -171,7 +172,7 @@ int Band::process_button(uint8_t press)
     }
     break;
   case 9: //6
-    if (!auto_on)
+    if (!autof)
     {
       Serial1.print(F("click b6,1"));
       Serial1.write(term, 3);

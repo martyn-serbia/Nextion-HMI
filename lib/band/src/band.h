@@ -8,15 +8,13 @@
 
 #include "Arduino.h"
 
-extern const uint8_t term[3];
-extern uint8_t auto_on;
 
 class Band
 {
   public:
     int SetBandBCD(uint8_t band_no);
     int Cat_band(void);
-    int process_button(uint8_t press);
+    int process_button(uint8_t press, uint8_t autof);
 
   private:
     
