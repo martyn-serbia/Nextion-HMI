@@ -1,3 +1,21 @@
+  /*  
+    main.cpp RF Amplifier and LPF controller.
+    Copyright (C) 2021  Martyn Osborn 5B4AMO
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -8,29 +26,27 @@ OneWire oneWire(ONE_WIRE_BUS);       // Setup a oneWire instance to communicate 
 DallasTemperature sensors(&oneWire); // Pass oneWire reference to Dallas Temperature.
 
 void HMI_read();
-//void process_button(uint8_t);
 void BandSW_Reset(void);
 void HMI_display_update(void);
 void reset(void);
 void PwrSwr_read(void);
 void VoltCurrent_read(void);
 void Temp_read(void);
-//int Cat_band(void);
 
 const uint8_t term[3] = {0xff, 0xff, 0xff};
 
-const unsigned int PwrSwrRefreshInterval = 100;      //Power and SWR fastest
-const unsigned int VoltCurrentRefreshInterval = 250; // Voltage Current and CAT input next fastest
+const unsigned int PwrSwrRefreshInterval = 100;      //Power and SWR fastest loop
+const unsigned int VoltCurrentRefreshInterval = 250; // Voltage Current and CAT input next fastest loop
 const unsigned int TempRefreshInterval = 1000;       // Temp is slow >500ms for temp read
 unsigned long previousPwrSwrMillis = 0;
 unsigned long previousVoltageCurrentMillis = 0;
 unsigned long previousTempMillis = 0;
 
-unsigned int power = 45;
-unsigned int swr = 18;
-unsigned int current = 120;
-unsigned int voltage = 127;
-unsigned int temp = 327;
+unsigned int power;
+unsigned int swr;
+unsigned int current;
+unsigned int voltage;
+unsigned int temp;
 
 static uint8_t band_set = 0; //preserved between calls
 static uint8_t auto_on = 0;  //preserved between calls
@@ -55,7 +71,7 @@ void setup()
   pinMode(A2, INPUT); // Current analogue
   pinMode(A3, INPUT); // Voltage analogue
 
-  reset();
+  reset(); //start on 160M, auto off
 }
 
 void loop()
@@ -88,7 +104,7 @@ void loop()
       }
       else
       {
-        // error handler for cat off, bad button code
+        // TO DO: error handler for cat off, bad button code
       }
       HMI_display_update();
       // Serial.print("Band is = ");
@@ -103,84 +119,6 @@ void loop()
     previousTempMillis = currentTime;
   }
 }
-
-// int Cat_band(void)
-// {
-//   const char *CatFrqReq[6] = {"FA;", "FB;", "FC;", "FD;", "FE;", "FF;"};
-//   long CatFreq[6];
-//   for (int i = 0; i < 6; i++)
-//   {
-//     Serial2.print(CatFrqReq[i]);
-//     CatFreq[i] = Serial2.parseInt();
-//     // Serial.print("Command = ");
-//     // Serial.print(CatFrqReq[i]);
-//     // Serial.print("/tResponse is:");
-//     // Serial.println(CatFreq[i]);
-//   }
-//   Serial2.print("FR;");
-//   int RX_index = Serial2.parseInt(); //get active reciever number
-//   long Frequency = CatFreq[RX_index];
-//   // Serial.print("RX_index = ");
-//   // Serial.print(RX_index);
-//   // Serial.print("/tFrequency is:  ");
-//   // Serial.println(Frequency);
-//   if (Frequency >= 1800000 && Frequency <= 2000000)
-//   {
-//     return 160;
-//   }
-//   else if (Frequency >= 3500000 && Frequency <= 4000000)
-//   {
-//     return 80;
-//   }
-//   else if (Frequency >= 5000000 && Frequency <= 5500000)
-//   {
-//     return 60;
-//   }
-//   else if (Frequency >= 7000000 && Frequency <= 7300000)
-//   {
-//     return 40;
-//   }
-//   else if (Frequency >= 10000000 && Frequency <= 10300000)
-//   {
-//     return 30;
-//   }
-//   else if (Frequency >= 14000000 && Frequency <= 14350000)
-//   {
-//     return 20;
-//   }
-//   else if (Frequency >= 18000000 && Frequency <= 18170000)
-//   {
-//     return 17;
-//   }
-//   else if (Frequency >= 21000000 && Frequency <= 21450000)
-//   {
-//     return 15;
-//   }
-//   else if (Frequency >= 24890000 && Frequency <= 25000000)
-//   {
-//     return 12;
-//   }
-//   else if (Frequency >= 28000000 && Frequency <= 30000000)
-//   {
-//     return 10;
-//   }
-//   else if (Frequency >= 50000000 && Frequency <= 52000000)
-//   {
-//     return 6;
-//   }
-//   else if (Frequency >= 144000000 && Frequency <= 146000000)
-//   {
-//     return 2;
-//   }
-//   else if (Frequency >= 430000000 && Frequency <= 440000000)
-//   {
-//     return 430;
-//   }
-//   else
-//   {
-//     return 0;
-//   }
-// }
 
 void PwrSwr_read(void)
 {
@@ -275,81 +213,6 @@ void HMI_read()
     }
   }
 }
-
-// void process_button(uint8_t press)
-// {
-//   switch (press)
-//   {
-//   case 2: //Toggle Auto
-//     auto_on = !auto_on;
-//     if (auto_on)
-//     {
-//       Serial1.print(F("bt7.val=1"));
-//       Serial1.write(term, 3);
-//     }
-//     else
-//     {
-//       Serial1.print(F("bt7.val=0"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 3: //160
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b0,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 4: //80
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b1,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 5: //40
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b2,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 6: //20
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b3,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 7: //15
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b4,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 8: //10
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b5,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 9: //6
-//     if (!auto_on)
-//     {
-//       Serial1.print(F("click b6,1"));
-//       Serial1.write(term, 3);
-//     }
-//     break;
-//   case 22:
-//     resetBtn();
-//     break;
-//   default:
-//     // default is ignore
-//     break;
-//   }
-// }
 
 void reset(void)
 {
